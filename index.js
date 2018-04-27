@@ -17,6 +17,7 @@ const app = express()
 const usersRouter = require('./routes/users')
 const authRouter = require('./routes/auth')
 const questionsRouter = require('./routes/questions')
+const musicRouter = require('./routers/music')
 
 app.use(
   morgan(process.env.NODE_ENV === 'production' ? 'common' : 'dev', {
@@ -38,12 +39,13 @@ app.get('/', function(req, res) {
 
 app.use('/signup', usersRouter)
 app.use('/auth', authRouter)
-app.use('/simlish', questionsRouter)
+app.use('/music', musicRouter)
 
 passport.use(localStrategy)
 passport.use(jwtStrategy)
 
 app.use(passport.authenticate('jwt', { session: false, failWithError: true })) // protected endpoints below!
+app.use('/simlish', questionsRouter)
 
 app.use(function(req, res, next) {
   // console.log('404 error ran');
