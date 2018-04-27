@@ -2,22 +2,10 @@
 
 require('dotenv').config()
 const express = require('express')
-const cors = require('cors')
 const morgan = require('morgan')
-const path = require('path')
-// const bodyParser = require('body-parser')
-const passport = require('passport')
-const localStrategy = require('./passport/local')
-const jwtStrategy = require('./passport/jwt')
 
 const { DATABASE_URL, PORT, CLIENT_ORIGIN } = require('./config')
-const { dbConnect } = require('./db-mongoose')
 const app = express()
-
-const usersRouter = require('./routes/users')
-const authRouter = require('./routes/auth')
-const questionsRouter = require('./routes/questions')
-const musicRouter = require('./routers/music')
 
 app.use(
   morgan(process.env.NODE_ENV === 'production' ? 'common' : 'dev', {
@@ -25,27 +13,20 @@ app.use(
   })
 )
 
-app.use(
-  cors({
-    origin: CLIENT_ORIGIN
-  })
-)
+// app.use(
+//   cors({
+//     origin: CLIENT_ORIGIN
+//   })
+// )
 
 app.use(express.json())
 
-app.get('/', function(req, res) {
-  res.sendFile(path.join(__dirname + '/index.html'))
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  next()
 })
-
-app.use('/signup', usersRouter)
-app.use('/auth', authRouter)
-app.use('/music', musicRouter)
-
-passport.use(localStrategy)
-passport.use(jwtStrategy)
-
-app.use(passport.authenticate('jwt', { session: false, failWithError: true })) // protected endpoints below!
-app.use('/simlish', questionsRouter)
+app.use(express.static('public'))
 
 app.use(function(req, res, next) {
   // console.log('404 error ran');
@@ -77,7 +58,6 @@ function runServer(port = PORT) {
 }
 
 if (require.main === module) {
-  dbConnect()
   runServer()
 }
 
